@@ -1,10 +1,12 @@
 {
   "schemaVersion": 1,
   "id": "minehuttools",
-  "version": "1.2.10",
+  "version": "${version}",
   "name": "MinehutTools",
   "description": "Helpful Minehut quality-of-life features.",
   "authors": ["snowisnotcold"],
+  "license": "CC0-1.0",
+  "icon": "assets/minehuttools/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["snowisnotcold.minehuttools.MinehutToolsMod"],

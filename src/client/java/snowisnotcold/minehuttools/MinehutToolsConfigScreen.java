@@ -7,12 +7,13 @@ import net.minecraft.network.chat.Component;
 
 /** Animated config screen. All motion uses one symmetric easing so exits mirror entrances exactly. */
 public class MinehutToolsConfigScreen extends Screen {
-    private static final int PW = 340, BASE_H = 200, ROW_PITCH = 52, ROWS = 3;
-    private static final String[] TITLES = { "Block [AD] messages", "Decline lobby resource pack", "Auto-use server packs" };
+    private static final int PW = 340, BASE_H = 200, ROW_PITCH = 52, ROWS = 4;
+    private static final String[] TITLES = { "Block [AD] messages", "Decline lobby resource pack", "Auto-use server packs", "Mute lobby ad sounds" };
     private static final String[] SUBS = {
         "Hide Ad Messages in the Lobby",
         "Never download the Minehut lobby pack",
-        "Load packs when you join other servers" };
+        "Load packs when you join other servers",
+        "Silence the ad sound in the lobby" };
 
     // ---- unified timing ----
     private static final float DUR = 0.35f;
@@ -43,13 +44,14 @@ public class MinehutToolsConfigScreen extends Screen {
     // ---- state ----
     private boolean get(int i) {
         MinehutToolsConfig c = MinehutToolsConfig.get();
-        return i == 0 ? c.blockAds : i == 1 ? c.declineLobbyPack : c.autoUsePacks;
+        return i == 0 ? c.blockAds : i == 1 ? c.declineLobbyPack : i == 2 ? c.autoUsePacks : c.muteLobbyAdSounds;
     }
     private void flip(int i) {
         MinehutToolsConfig c = MinehutToolsConfig.get();
         if (i == 0) c.blockAds = !c.blockAds;
         else if (i == 1) c.declineLobbyPack = !c.declineLobbyPack;
-        else c.autoUsePacks = !c.autoUsePacks;
+        else if (i == 2) c.autoUsePacks = !c.autoUsePacks;
+        else c.muteLobbyAdSounds = !c.muteLobbyAdSounds;
         MinehutToolsConfig.save();
     }
 
@@ -62,10 +64,13 @@ public class MinehutToolsConfigScreen extends Screen {
     private float panelT() { return ease((float) (tl() / DUR)); }
     private float rowT(int i) { return ease((float) ((tl() - ROW_DELAY - i * STAGGER) / DUR)); }
 
-    private int panelH() { return BASE_H + (int) (ROW_PITCH * ease(subAnim)); }
+    private int panelH() { return BASE_H + (int) (ROW_PITCH * (1f + ease(subAnim))); }
     private int px() { return (width - PW) / 2; }
     private int py(float t) { return (height - panelH()) / 2 + (int) ((1f - t) * 24); }
-    private int rowY(int i, float t) { return py(t) + 52 + i * ROW_PITCH; }
+    private int rowY(int i, float t) {
+        float slot = i <= 2 ? i : 2f + ease(subAnim);
+        return py(t) + 52 + (int) (slot * ROW_PITCH);
+    }
     private boolean inRow(int i, double mx, double my, float t) {
         if (closing) return false;
         if (i == 2 && (subAnim < 0.8f || !MinehutToolsConfig.get().declineLobbyPack)) return false;

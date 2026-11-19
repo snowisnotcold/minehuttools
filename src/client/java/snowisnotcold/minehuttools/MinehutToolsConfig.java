@@ -17,9 +17,18 @@ public class MinehutToolsConfig {
     public boolean blockAds = true;
     public boolean declineLobbyPack = true;
     public boolean autoUsePacks = true;
+    public boolean muteLobbyAdSounds = true;
     public String lobbyPackKey = "";
 
     public static MinehutToolsConfig get() { return instance; }
+
+    /**
+     * Whether packs pushed by player servers should be loaded. "Auto-use server packs" is only shown
+     * (and only applies) while "Decline lobby resource pack" is on; otherwise packs are never touched.
+     */
+    public boolean shouldAcceptPlayerServerPacks() {
+        return !declineLobbyPack || autoUsePacks;
+    }
 
     public static void load() {
         try {

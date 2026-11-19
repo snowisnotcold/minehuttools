@@ -30,6 +30,14 @@ public abstract class ClientCommonPacketListenerImplMixin {
         boolean isLobbyHost = LobbyDetector.isLobbyHost(host);
 
         if (isPlayerServer) {
+            // "Auto-use server packs" off -> decline packs from player servers
+            if (!MinehutToolsConfig.get().shouldAcceptPlayerServerPacks()) {
+                LoggerFactory.getLogger("MinehutTools").info("Player server pack from '{}' url={} required={} -> DECLINED (auto-use off)",
+                    host, packet.url(), packet.required());
+                connection.send(new ServerboundResourcePackPacket(
+                    packet.id(), ServerboundResourcePackPacket.Action.DECLINED));
+                ci.cancel();
+            }
             return;
         }
 

@@ -2,10 +2,10 @@ package snowisnotcold.minehuttools;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 
 public class MinehutToolsMod implements ClientModInitializer {
 
@@ -14,9 +14,14 @@ public class MinehutToolsMod implements ClientModInitializer {
         MinehutToolsConfig.load();
 
         // System / server messages
-        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> !shouldBlock(message));
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> !AdFilter.shouldBlock(message));
         // Player chat messages
-        ClientReceiveMessageEvents.ALLOW_CHAT.register((message, signed, sender, params, time) -> !shouldBlock(message));
+        ClientReceiveMessageEvents.ALLOW_CHAT.register((message, signed, sender, params, time) -> !AdFilter.shouldBlock(message));
+
+        int[] ticks = { 0 };
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (ticks[0]++ % 20 == 0) LobbyDetector.refresh(mc);
+        });
 
         // /minehuttools and /mt both open the config screen
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -31,8 +36,4 @@ public class MinehutToolsMod implements ClientModInitializer {
         });
     }
 
-    private static boolean shouldBlock(Component message) {
-        if (!MinehutToolsConfig.get().blockAds) return false;
-        return message.getString().stripLeading().startsWith("[AD]");
-    }
 }
